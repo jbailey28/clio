@@ -1,0 +1,49 @@
+# Runs the tests on GitHub's own Mac, never on yours.
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: All tests (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  quoting-check-can-fail:
+    # Breaks the Terminal quoting on purpose and expects the Open in Claude Code test to go red.
+    # If it stays green, that test can't catch the bug that wiped the home folder on 2026-10-23.
+    name: Quoting check can fail (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Remove the quoting
+        run: |
+          sed -i '' 's/"cd " \& quoted form of dir/"cd " \& dir/' src/core/claudeCode.ts
+          grep -q '"cd " & dir &' src/core/claudeCode.ts || { echo "The quoting wasn't removed, so this proves nothing."; exit 1; }
+      - name: The test must fail
+        run: |
+          if npx vitest run tests/claude-code.test.ts; then
+            echo "The test passed with the quoting removed. It can't catch the bug."
+            exit 1
+          fi
+          echo "The test failed with the quoting removed, as it should."

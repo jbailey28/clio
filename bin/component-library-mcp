@@ -1,0 +1,10 @@
+#!/bin/sh
+# Starts the Component Library MCP server over stdio.
+# Paths come from this file's own folder, so it works from any folder, whatever PATH Claude Code passes.
+# better-sqlite3 is compiled for Node 22, so a Node 22 is picked on purpose: other versions on the Mac won't load it.
+# COMPONENT_LIBRARY_NODE overrides the choice.
+here="$(cd "$(dirname "$0")/.." && pwd)"
+node="${COMPONENT_LIBRARY_NODE:-}"
+[ -n "$node" ] || node="$(ls -d "$HOME"/.nvm/versions/node/v22.*/bin/node 2>/dev/null | tail -n 1)"
+[ -n "$node" ] || node="$(command -v node)"
+exec "$node" "$here/node_modules/tsx/dist/cli.mjs" "$here/src/mcp/main.ts" "$@"

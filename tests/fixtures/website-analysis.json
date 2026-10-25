@@ -1,0 +1,96 @@
+{
+  "name": "Website Analysis",
+  "slug": "website-analysis",
+  "category": "Website Research",
+  "categoryDescription": "Reading websites to learn what they run",
+  "summary": "Reads a web page and says which software the site runs, with evidence: ecommerce platform, support chat, reviews, email and SMS, payments and checkout, CRM, and competitor fingerprints you add.",
+  "documentation": "# Website Analysis\n\nA made-up component used only by the search tests. It has no code.\n\nReads the HTML of a web page and says which third-party software the site runs: its online store platform, live chat or helpdesk widget, reviews widget, email marketing and SMS tool, payment processor and checkout, and CRM. This is often called technographics, tech stack lookup or technology identification from a URL.\n\nIt works by fingerprinting: it collects the hostnames in script src and link href attributes and matches them against a fingerprint library. Visible page text is never matched, so a blog post that mentions Shopify does not count.\n\n## What it can find\n\n- Ecommerce platforms such as Shopify, WooCommerce and BigCommerce (the shopping cart software a store runs on).\n- Support chat and customer messaging tools such as Intercom and Zendesk.\n- Reviews widgets that show product reviews on a store page.\n- Email marketing, newsletter software and SMS tools.\n- Payment processors and checkout tools.\n- CRMs such as Salesforce and HubSpot (customer relationship management software).\n- Your own competitor fingerprints, added as a list.\n\n## How to read a result\n\nEach check returns found, not found or unknown, with the evidence. Found is strong evidence. Not found can be weak, because some tools only load after login or in the cart. A page that could not be read is unknown, never not found.\n",
+  "language": "Python",
+  "version": "1.1.0",
+  "capabilities": [
+    {
+      "name": "Ecommerce platform detection",
+      "description": "online store platforms such as Shopify and WooCommerce",
+      "kind": "capability"
+    },
+    {
+      "name": "Support chat detection",
+      "description": "live chat and helpdesk widgets such as Intercom and Zendesk",
+      "kind": "capability"
+    },
+    {
+      "name": "Reviews detection",
+      "description": "product reviews widgets",
+      "kind": "capability"
+    },
+    {
+      "name": "Email and SMS detection",
+      "description": "email marketing and SMS tools",
+      "kind": "capability"
+    },
+    {
+      "name": "Payments and checkout detection",
+      "description": "payment processors and checkout tools",
+      "kind": "capability"
+    },
+    {
+      "name": "CRM detection",
+      "description": "CRMs such as Salesforce and HubSpot",
+      "kind": "capability"
+    },
+    {
+      "name": "Custom competitor fingerprints",
+      "description": "add your own competitors as fingerprints to look for",
+      "kind": "capability"
+    },
+    {
+      "name": "Custom fingerprint library",
+      "description": "swap in a different fingerprint library",
+      "kind": "capability"
+    },
+    {
+      "name": "Unknown is never not found",
+      "description": "a page that can't be read is reported as unknown, with the reason",
+      "kind": "check"
+    },
+    {
+      "name": "Page text is never matched",
+      "description": "only hostnames in script src and link href count as evidence",
+      "kind": "check"
+    },
+    {
+      "name": "Bad fingerprint data is refused",
+      "description": "a fingerprint with missing fields raises an error",
+      "kind": "check"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "url",
+      "type": "string",
+      "description": "page to fetch"
+    },
+    {
+      "name": "html",
+      "type": "string",
+      "description": "HTML of a page already fetched"
+    },
+    {
+      "name": "fingerprints",
+      "type": "path | dict",
+      "description": "a custom fingerprint library"
+    },
+    {
+      "name": "competitors",
+      "type": "list",
+      "description": "your own competitors to look for"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "report",
+      "type": "dict",
+      "description": "one result per check, each found, not_found or unknown, with evidence"
+    }
+  ]
+}
