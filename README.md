@@ -1,19 +1,84 @@
-# Component Library
+# CLIO, Your Personal Component Library
+
+## What CLIO does
+
+Right now, CLIO lets you:
+
+- **Save and organize components.** Keep reusable functionality in one place instead of searching through old projects.
+- **Understand what you've built.** Each component has a description of its capabilities, checks, and test results.
+- **Track where components are used.** See which projects use a component and which version they're using.
+- **Connect with Claude Code.** CLIO has an MCP server that lets Claude search your library when you're working on something new.
+- **Build projects using existing components.** Describe what you want to build, review a plan, and choose which components to reuse.
+- **Test your work.** Check whether components are working and whether a new project is actually using them.
+
+CLIO keeps its data locally. You don't need to store your projects or component library on a service I operate.
+
+The features that use AI run through your own Claude Code, so what you describe and the relevant component code are sent to Claude.
+
+## What I'm working on next
+
+A lot of my time building with Claude is spent figuring out the design and functionality at the same time.
+
+I'm working toward adding visual components to CLIO, so I can save things like buttons, forms, cards, and navigation, including how they behave when you interact with them.
+
+I'd also like to be able to select several components while browsing my library and use them as the starting point for a new project.
+
+Those features are still in development.
+
+## Getting started
+
+CLIO is a local application with a browser interface and an optional connection to Claude Code through MCP.
+
+The installation instructions below explain how to set it up on your own computer.
+
+### What you need
+
+- A Mac. CLIO runs tests inside the sandbox built into macOS, and the "Open in Claude Code" button uses the Mac's Terminal.
+- [Node.js 22](https://nodejs.org/). CLIO's database library is built for Node 22, so other versions won't load it.
+- Python 3. CLIO uses it to read your components' code. Run `python3 --version` to check; if it's missing, your Mac offers to install it.
+- [Claude Code](https://claude.com/claude-code), installed and signed in, for the features that use AI.
+
+### Install and run
+
+```
+git clone https://github.com/jbailey28/clio.git
+cd clio
+npm install
+npm run build
+npm start
+```
+
+Then open http://127.0.0.1:4410 in your browser. To stop CLIO, press Ctrl+C in that window.
+
+Your library is saved in `~/.component-library/library.db` on your computer. Set `COMPONENT_LIBRARY_HOME` to keep it somewhere else.
+
+### Connect it to Claude Code (optional)
+
+From inside the `clio` folder, run:
+
+```
+claude mcp add --scope user component-library -- "$PWD/bin/component-library-mcp"
+```
+
+Claude Code can then search your library while you work. Every change it wants to make to your library asks for your approval first.
+
+## Why I'm building it
+
+I've been trying to build one useful project a week with Claude Code, ideally getting a working version done in a day.
+
+I don't expect CLIO to make every project possible to finish that quickly. I'm mostly interested in understanding how things work, how projects are structured, how integrations connect, and how to test what I'm building.
+
+If I can reuse something I built last week instead of starting over, I'd like to do that.
+
+And if this helps someone else organize what they're building, even better.
+
+---
+
+# How it works (for developers)
 
 A local library of reusable code: categories, components (pointing at real source on disk), their capabilities and checks, inputs/outputs, dependencies, tests, and the projects that use them.
 
-## Run
-
-```
-cd ~/component-library
-npm install        # first time only
-npm run build
-npm start          # http://127.0.0.1:4410
-```
-
-`npm run dev` runs the same thing with hot reload.
-
-Data lives in `~/.component-library/library.db` (override with `COMPONENT_LIBRARY_HOME`). Migrations run automatically on start and are safe to repeat.
+`npm run dev` runs the app with hot reload. Migrations run automatically on start and are safe to repeat.
 
 ## Test
 
@@ -44,10 +109,10 @@ npm run typecheck
 `bin/component-library-mcp` starts the MCP server over stdio (`src/mcp/main.ts` → `src/mcp/server.ts`). It opens the same database through `openLibrary()` and doesn't need the browser app. It's registered at user scope:
 
 ```
-claude mcp add --scope user component-library -- ~/component-library/bin/component-library-mcp
+claude mcp add --scope user component-library -- "$PWD/bin/component-library-mcp"   # run inside the clio folder
 ```
 
-The launcher pins the absolute node path, because better-sqlite3 is compiled for that Node version. If you switch Node versions, update the path in `bin/component-library-mcp` and run `npm rebuild better-sqlite3`.
+better-sqlite3 is compiled for Node 22, so the launcher picks a Node 22 (from nvm if present, otherwise `node` on PATH). `COMPONENT_LIBRARY_NODE` overrides the choice. If you switch Node versions, run `npm rebuild better-sqlite3`.
 
 Read-only tools: `search_components`, `find_reusable_functionality`, `check_for_duplicates`, `propose_capture`, `list_categories`, `get_category`, `get_component`, `list_projects`, `get_project`, `compare_versions`, `verify_release`.
 
