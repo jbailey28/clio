@@ -41,7 +41,8 @@ const SECRET_PATTERNS: { label: string; re: RegExp }[] = [
   { label: "Stripe live key", re: /\b[sr]k_live_[A-Za-z0-9]{20,}/ },
   { label: "Google API key", re: /\bAIza[0-9A-Za-z_-]{35}\b/ },
   { label: "webhook URL (works like a password)", re: /https:\/\/(?:(?:ptb\.|canary\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]{20,}|hooks\.slack\.com\/(?:services|workflows|triggers)\/[\w/-]{20,}|[\w-]+\.webhook\.office\.com\/[\w/@-]{20,})/ },
-  { label: "password or key written into the code", re: /\b(?:api[_-]?key|secret|password|passwd|access[_-]?token|auth[_-]?token)\b["']?\s*[:=]\s*["'][^"'\s$<{]{12,}["']/i },
+  // A value that is exactly env(NAME) is a pointer to configuration (Supabase's config.toml uses it), not a secret.
+  { label: "password or key written into the code", re: /\b(?:api[_-]?key|secret|password|passwd|access[_-]?token|auth[_-]?token)\b["']?\s*[:=]\s*["'](?!env\([A-Za-z_][A-Za-z0-9_]*\)["'])[^"'\s$<{]{12,}["']/i },
 ];
 
 export interface SecretFinding { file: string; line: number; label: string }

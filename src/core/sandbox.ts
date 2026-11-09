@@ -46,7 +46,8 @@ export function sandboxedPythonTestCommand(): string {
     `/usr/bin/sandbox-exec -f ${q(profile)} -D DIR="$D" -D TMP="$T" -D HOME_DIR=${q(fs.realpathSync(os.homedir()))}`,
     `/usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. TMPDIR="$T" HOME="$T"`,
     `${PYTHON} -m unittest discover -s tests -p 'test_*.py' -v;`,
-    `r=$?; rm -rf "$T"; exit $r`,
+    // Delete only a folder mktemp made under the Mac's temp areas: if $T were ever empty or anything else, nothing is deleted.
+    `r=$?; case "$T" in /private/var/folders/?*|/private/tmp/?*) rm -rf "$T";; esac; exit $r`,
   ].join(" ");
 }
 
@@ -90,7 +91,8 @@ export function sandboxedTraceCommand(): string {
     `/usr/bin/sandbox-exec -f ${q(profile)} -D DIR="$D" -D TMP="$T" -D HOME_DIR=${q(fs.realpathSync(os.homedir()))}`,
     `/usr/bin/env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. TMPDIR="$T" HOME="$T"`,
     `${PYTHON} "$T/run_tests.py";`,
-    `r=$?; rm -rf "$T"; exit $r`,
+    // Delete only a folder mktemp made under the Mac's temp areas: if $T were ever empty or anything else, nothing is deleted.
+    `r=$?; case "$T" in /private/var/folders/?*|/private/tmp/?*) rm -rf "$T";; esac; exit $r`,
   ].join(" ");
 }
 

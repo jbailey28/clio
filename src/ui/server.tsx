@@ -3,6 +3,17 @@ import { notFound as nextNotFound } from "next/navigation";
 import type { ReactNode } from "react";
 import type { Category, ComponentSummary, FunctionalityMatch, TestStatus } from "@/src/core";
 import { ArrowRight, ChevronRight, I, Package, categoryIcon } from "./icons";
+import { getLib } from "@/src/web/lib";
+
+/** Component id → names of the projects recorded as using it. */
+function usedByNames(): Map<string, string[]> {
+  const lib = getLib();
+  const map = new Map<string, string[]>();
+  for (const p of lib.projects.list()) {
+    for (const u of lib.projects.get(p.id).components) map.set(u.componentId, [...(map.get(u.componentId) ?? []), p.name]);
+  }
+  return map;
+}
 
 export function Flash({ sp }: { sp: { ok?: string; error?: string } }) {
   return (
@@ -21,6 +32,7 @@ export function TestBadge({ status }: { status: TestStatus | null }) {
 
 export function ComponentList({ items, empty }: { items: ComponentSummary[]; empty: string }) {
   if (!items.length) return <Empty title={empty} />;
+  const usedBy = usedByNames();
   return (
     <ul className="rows">
       {items.map((c) => (
@@ -30,6 +42,12 @@ export function ComponentList({ items, empty }: { items: ComponentSummary[]; emp
             <span className="body">
               <strong>{c.name}</strong> <span className="muted small">· {c.categoryName}</span>
               {c.summary && <div className="desc">{c.summary}</div>}
+              {usedBy.get(c.id)?.length ? (
+                <div className="tags" aria-label="Used by">
+                  <span className="muted small">Used by</span>
+                  {usedBy.get(c.id)!.map((n) => <span key={n} className="tag">{n}</span>)}
+                </div>
+              ) : null}
             </span>
             <span className="meta">{c.version ? `v${c.version}` : ""}</span>
             <TestBadge status={c.lastTestStatus} />

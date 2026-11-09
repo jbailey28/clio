@@ -6,7 +6,7 @@
 import {
   ArrowLeft, ArrowRight, BookOpen, Box, Brain, ChevronDown, CircleAlert, CircleCheck, ChevronRight, ChevronsLeft, ChevronsRight, CircleHelp, Clock, Code,
   Copy, Cpu, Database, FileText, FlaskConical, Folder, FolderOpen, GitBranch, Globe, HardDrive, House, Layers, LayoutGrid, Link, Lock, Mail, Mic, MicOff,
-  Monitor, Package, Plus, Puzzle, Search, Settings, Shield, ShieldCheck, Sparkles, Terminal, Timer, Trash2, TriangleAlert, Undo2, Wrench, X, Zap, type LucideIcon, type LucideProps,
+  Monitor, Package, Play, Plus, Puzzle, Search, Settings, Shield, ShieldCheck, Sparkles, Square, Terminal, Timer, Trash2, TriangleAlert, Undo2, Wrench, X, Zap, type LucideIcon, type LucideProps,
 } from "lucide-react";
 
 export const ICON = { size: 20, strokeWidth: 1.75 } as const;
@@ -18,7 +18,7 @@ export function I({ icon: Icon, size = ICON.size, ...rest }: { icon: LucideIcon 
 export {
   ArrowLeft, ArrowRight, BookOpen, Box, ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, CircleHelp, Clock, Code, Copy, Database,
   FileText, FlaskConical, Folder, GitBranch, Globe, HardDrive, House, Layers, LayoutGrid, Link, Package, Plus, Search, Settings, Shield,
-  Terminal, Timer, Wrench, Sparkles, ShieldCheck, TriangleAlert, CircleCheck, CircleAlert, FolderOpen, Puzzle, Mic, MicOff, Trash2, Undo2, X,
+  Terminal, Timer, Wrench, Sparkles, ShieldCheck, TriangleAlert, CircleCheck, CircleAlert, FolderOpen, Puzzle, Mic, MicOff, Trash2, Undo2, X, Play, Square,
 };
 
 /** Categories have no icon field: the icon follows the name, with a plain folder when nothing fits. */

@@ -22,6 +22,7 @@ import * as integration from "./integration";
 import * as inspection from "./inspect";
 import * as removal from "./removal";
 import * as claudeCode from "./claudeCode";
+import * as runApp from "./runApp";
 import { libraryCodeDir } from "./db";
 
 export function createLibrary(db: DB, dbPath = "") {
@@ -117,6 +118,14 @@ export function createLibrary(db: DB, dbPath = "") {
       check: (ref: string) => claudeCode.checkOpen(db, ref),
       open: (ref: string) => claudeCode.openInClaudeCode(db, ref),
     },
+    /** "Run": start and stop a project's app with a built-in, approved command. Never a shell. */
+    run: {
+      status: (ref: string) => runApp.runStatus(db, ref),
+      setPreset: (ref: string, preset: string) => runApp.setRunPreset(db, ref, preset),
+      approve: (ref: string) => runApp.approveRun(db, ref),
+      start: (ref: string) => runApp.startRun(db, ref),
+      stop: (ref: string) => runApp.stopRun(db, ref),
+    },
     removal: {
       projectFolder: (ref: string) => removal.projectFolderCheck(db, ref),
       removeProject: (ref: string, opts: { confirm: string; trashFolder?: boolean }) => removal.removeProject(db, ref, opts),
@@ -183,6 +192,7 @@ export type * from "./testing";
 export type * from "./settings";
 export type * from "./discovery";
 export type * from "./packaging";
+export type { RunStatus, RunPreset } from "./runApp";
 export type * from "./releases";
 export type * from "./capture";
 export type * from "./creation";
