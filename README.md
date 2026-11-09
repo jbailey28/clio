@@ -10,6 +10,7 @@ Right now, CLIO lets you:
 - **Connect with Claude Code.** CLIO has an MCP server that lets Claude search your library when you're working on something new.
 - **Build projects using existing components.** Describe what you want to build, review a plan, and choose which components to reuse.
 - **Test your work.** Check whether components are working and whether a new project is actually using them.
+- **Run your projects.** Start a project's app from its page with a Run button, and stop it the same way.
 
 CLIO keeps its data locally. You don't need to store your projects or component library on a service I operate.
 

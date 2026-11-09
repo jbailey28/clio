@@ -4,9 +4,10 @@ import { ActionForm, CopyButton } from "@/src/ui/client";
 import { ConfirmAction } from "@/src/ui/confirm";
 import { RemoveFromProject } from "@/src/ui/remove-from-project";
 import { OpenInClaudeCode } from "@/src/ui/open-in-claude";
+import { RunApp } from "@/src/ui/run-app";
 import { Ago, Empty, Flash, TestBadge, day, orNotFound, plural, when, type SP } from "@/src/ui/server";
 import { ArrowLeft, ChevronRight, Folder, I, Package, categoryIcon } from "@/src/ui/icons";
-import type { ProjectDetail } from "@/src/core";
+import type { ProjectDetail, RunStatus } from "@/src/core";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,8 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
   const lib = getLib();
   const p = orNotFound(() => lib.projects.get(id));
   const tab: Tab = (TABS as readonly string[]).includes(sp.tab ?? "") ? (sp.tab as Tab) : "overview";
+  // A library started before Run existed has no lib.run until it restarts: the page still shows, without the Run card.
+  const run = tab === "overview" && lib.run ? await lib.run.status(p.id) : null;
   const runs = p.components
     .flatMap((c) => lib.tests.list(c.componentId, 20).map((r) => ({ ...r, componentName: c.name, slug: c.slug })))
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
@@ -43,7 +46,7 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
           </Link>
         ))}
       </nav>
-      {tab === "overview" && <Overview p={p} runCount={runs.length} />}
+      {tab === "overview" && <Overview p={p} runCount={runs.length} run={run} />}
       {tab === "components" && <Components p={p} add={sp.add} />}
       {tab === "runs" && <Runs p={p} runs={runs} />}
       {tab === "settings" && <SettingsTab p={p} />}
@@ -51,9 +54,56 @@ export default async function ProjectPage({ params, searchParams }: { params: Pr
   );
 }
 
-function Overview({ p, runCount }: { p: ProjectDetail; runCount: number }) {
+/** Run: choose a built-in command, approve it once, then Run and Stop. */
+function RunCard({ p, run }: { p: ProjectDetail; run: RunStatus }) {
+  const here = `/projects/${p.id}`;
+  const choose = (label: string) => (
+    <ActionForm op="project.setRun" submit={label} className="inline" secondary returnTo={here}>
+      <input type="hidden" name="project" value={p.id} />
+      <label className="sr-only" htmlFor="run-preset">How this project runs</label>
+      <select id="run-preset" name="preset" required defaultValue={run.preset ?? ""}>
+        <option value="" disabled>Choose how it runs</option>
+        {run.presets.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+      </select>
+    </ActionForm>
+  );
+  return (
+    <section className="card run-card" aria-labelledby="run-title">
+      <h2 id="run-title" className="panel-title">Run</h2>
+      {!run.folder.ok ? (
+        <p className="flash error" role="alert">{run.folder.problem}</p>
+      ) : !run.preset && run.presets.length === 0 ? (
+        <p className="hint" style={{ marginTop: 0 }}>None of the built-in commands fit this project. Run needs a package.json with Expo, Next.js, or a &quot;dev&quot; script.</p>
+      ) : !run.preset ? (
+        <>
+          <p className="hint" style={{ marginTop: 0 }}>Pick how this project starts. Only built-in commands that fit this project are offered, never anything typed.</p>
+          {choose("Save")}
+        </>
+      ) : !run.approved ? (
+        <>
+          <p style={{ marginTop: 0 }}>This will run, in <code>{p.path}</code>:</p>
+          <pre>{run.command}</pre>
+          <p className="hint">The address may move to the next free one (up to localhost:8099). It starts the program directly, never through a shell.</p>
+          <ActionForm op="project.approveRun" submit="Approve this command" returnTo={here}>
+            <input type="hidden" name="project" value={p.id} />
+          </ActionForm>
+          <div style={{ marginTop: 16 }}>{choose("Change")}</div>
+        </>
+      ) : (
+        <>
+          <RunApp projectId={p.id} initial={run.running} initialEnded={run.ended} />
+          <p className="hint">Runs <code>{run.command}</code>. Choosing a different command needs approval again.</p>
+          {choose("Change")}
+        </>
+      )}
+    </section>
+  );
+}
+
+function Overview({ p, runCount, run }: { p: ProjectDetail; runCount: number; run: RunStatus | null }) {
   return (
     <div className="panels">
+      {run && <RunCard p={p} run={run} />}
       <section className="card" aria-labelledby="details-title">
         <h2 id="details-title" className="panel-title">Project Details</h2>
         <dl className="facts">
@@ -262,7 +312,11 @@ function RemoveProject({ p }: { p: ProjectDetail }) {
 function AddFromLibrary({ p, add }: { p: ProjectDetail; add?: string }) {
   const lib = getLib();
   const here = `/projects/${p.id}?tab=components`;
-  const choices = lib.components.search("", { limit: 1000 }).filter((c) => c.version && lib.components.get(c.id).releasedVersions.length);
+  // Components already copied in are left out. A link that is only recorded stays, so its files can be added properly.
+  const linked = new Map(p.components.map((u) => [u.componentId, u.integration]));
+  const choices = lib.components.search("", { limit: 1000 })
+    .filter((c) => c.version && lib.components.get(c.id).releasedVersions.length)
+    .filter((c) => !linked.has(c.id) || linked.get(c.id) === "");
   let preview: ReturnType<typeof lib.integration.preview> | null = null;
   let problem = "";
   if (add) { try { preview = lib.integration.preview(p.id, add); } catch (err) { problem = (err as Error).message; } }
@@ -273,7 +327,7 @@ function AddFromLibrary({ p, add }: { p: ProjectDetail; add?: string }) {
         <label className="sr-only" htmlFor="add-from-library">Component</label>
         <select id="add-from-library" name="add" required defaultValue={add ?? ""}>
           <option value="" disabled>Choose a component</option>
-          {choices.map((c) => <option key={c.id} value={c.slug}>{c.name} {c.version}</option>)}
+          {choices.map((c) => <option key={c.id} value={c.slug}>{c.name} {c.version}{linked.has(c.id) ? " (recorded, add the files)" : ""}</option>)}
         </select>
         <button type="submit" className="secondary">Show what it will add</button>
       </form>

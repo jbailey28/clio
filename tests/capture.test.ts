@@ -131,13 +131,16 @@ describe("secrets and sensitive files", () => {
 
   it("does not flag ordinary code that reads keys from configuration", () => {
     const f = path.join(tmp, "ok.py");
-    fs.writeFileSync(f, 'import os\napi_key = os.environ["API_KEY"]\npassword = getpass()\ntoken = "${TOKEN}"\nSECRET = ""\n');
+    fs.writeFileSync(f, 'import os\napi_key = os.environ["API_KEY"]\npassword = getpass()\ntoken = "${TOKEN}"\nSECRET = ""\nsecret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"\nauth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"\n');
     expect(findSecrets([f])).toEqual([]);
     for (const [label, line] of [
       ["private key", "-----BEGIN RSA PRIVATE KEY-----"], ["AWS access key", "AKIAIOSFODNN7EXAMPLE"],
       ["GitHub token", "ghp_abcdefghijklmnopqrstuvwxyz0123456789"],
       ["webhook URL (works like a password)", "https://discord.com/api/webhooks/123456789012345678/abcdefghijklmnopqrstuvwxyzABCDEFGH"],
       ["webhook URL (works like a password)", "url = 'https://hooks.slack.com/services/T000/B000/XXXXXXXXXXXXXXXXXXXXXXXX'"], ["password or key written into the code", 'password = "correct-horse-battery"'],
+      // Only a value that is exactly env(NAME) is a pointer. Anything more is still a secret.
+      ["password or key written into the code", 'secret = "env(X)correct-horse-battery"'],
+      ["password or key written into the code", 'secret = "envcorrect-horse-battery"'],
     ]) {
       fs.writeFileSync(f, line + "\n");
       expect(findSecrets([f])[0]?.label).toBe(label);

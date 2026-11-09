@@ -12,10 +12,9 @@ import { getSettings } from "./settings";
 import { runShell } from "./testing";
 
 /**
- * Putting a component's code into a project, the way Salesrunner holds
- * Website Analysis: the frozen release copied byte for byte into
- * components/<slug>/ (with its RELEASE.json), never edited. The release
- * itself is only read.
+ * Putting a component's code into a project: the frozen release copied
+ * byte for byte into components/<slug>/ (with its RELEASE.json), never
+ * edited. The release itself is only read.
  *
  * Added: the files are in the project. Connected: the project's tests ran in
  * the sandbox and called the component. Recording a link is neither.

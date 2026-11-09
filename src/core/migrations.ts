@@ -171,4 +171,14 @@ ALTER TABLE project_components ADD COLUMN integration_detail TEXT NOT NULL DEFAU
 ALTER TABLE project_components ADD COLUMN integration_checked_at TEXT NOT NULL DEFAULT '';
 `,
   },
+  {
+    version: 5,
+    name: "how a project runs",
+    sql: `
+-- One of the built-in run commands (src/core/runApp.ts RUN_PRESETS), or '' for none chosen.
+ALTER TABLE projects ADD COLUMN run_preset TEXT NOT NULL DEFAULT '';
+-- The preset the person approved. Run only starts when this equals run_preset.
+ALTER TABLE projects ADD COLUMN run_approved TEXT NOT NULL DEFAULT '';
+`,
+  },
 ];

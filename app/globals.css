@@ -186,6 +186,15 @@ table { border-collapse: collapse; width: 100%; }
 td, th { text-align: left; padding: var(--u); border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-weight: 500; font-size: 12px; }
 td:first-child code { overflow-wrap: normal; white-space: nowrap; }
+/* Inputs/outputs type column: wrap between words only, so the column can't be squeezed to a few letters. */
+td.io-type code { overflow-wrap: normal; }
+/* "Used by" project tags on component rows and the Overview. */
+.tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--u); margin: var(--u) 0 0; }
+.tag { display: inline-block; font-size: 12px; line-height: 1; padding: 4px var(--u); border-radius: 999px; border: 1px solid var(--line); color: var(--text); background: var(--panel); }
+a.tag:hover { border-color: var(--muted); }
+/* Run card on a project's Overview. */
+.run-card { grid-column: 1 / -1; }
+.run-app-row { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--u) * 2); }
 .table-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: var(--u) calc(var(--u) * 2); overflow-x: auto; }
 .table-card tr:last-child td { border-bottom: 0; }
 .list { list-style: none; padding: 0; margin: 0; }

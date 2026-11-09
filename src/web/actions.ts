@@ -68,6 +68,14 @@ export const ops: Record<string, Op> = {
     getLib().projects.setVersion(str(f, "project"), str(f, "component"), str(f, "version"));
     return withOk(str(f, "returnTo") || `/projects/${str(f, "project")}`, "Version updated");
   },
+  "project.setRun": (f) => {
+    getLib().run.setPreset(str(f, "project"), str(f, "preset"));
+    return withOk(str(f, "returnTo") || `/projects/${str(f, "project")}`, "Run command chosen. Approve it to run.");
+  },
+  "project.approveRun": (f) => {
+    getLib().run.approve(str(f, "project"));
+    return withOk(str(f, "returnTo") || `/projects/${str(f, "project")}`, "Run command approved");
+  },
   "project.unlink": (f) => {
     const r = getLib().removal.removeFromProject(str(f, "project"), str(f, "component"), { trashCopy: str(f, "copy") === "trash", confirm: str(f, "confirm") });
     return withOk(str(f, "returnTo") || `/projects/${str(f, "project")}`, r.trashed ? "Component removed from the project. Its copy is in the Trash." : "Component removed from the project");

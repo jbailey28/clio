@@ -55,7 +55,7 @@ function IOTable({ items, empty }: { items: IOItem[]; empty: string }) {
     <div className="table-card"><table>
       <tbody>
         {items.map((i) => (
-          <tr key={i.id}><td><code>{i.name}</code></td><td className="muted"><code>{i.type}</code></td><td>{i.description}</td></tr>
+          <tr key={i.id}><td><code>{i.name}</code></td><td className="muted io-type"><code>{i.type}</code></td><td>{i.description}</td></tr>
         ))}
       </tbody>
     </table></div>
@@ -68,6 +68,13 @@ function Overview({ c }: { c: ComponentDetail }) {
   return (
     <>
       {c.summary && <p style={{ fontSize: 15, marginTop: 0 }}>{c.summary}</p>}
+      <p className="tags">
+        <span className="muted small">Used by</span>
+        {c.projects.length
+          ? c.projects.map((u) => <Link key={u.projectId} href={`/projects/${u.projectId}`} className="tag">{u.projectName}</Link>)
+          : <span className="muted small">no project yet</span>}
+        <Link href={`/components/${c.slug}?tab=usage`} className="small">+ Add to a project</Link>
+      </p>
       <p className="muted small">
         Slug <code>{c.slug}</code> · ID <code>{c.id}</code>
         {c.language && <> · {c.language}</>}{c.version && <> · v{c.version}</>} · updated {when(c.updatedAt)}
@@ -238,7 +245,8 @@ function Tests({ c }: { c: ComponentDetail }) {
 }
 
 function Usage({ c }: { c: ComponentDetail }) {
-  const projects = getLib().projects.list().filter((p) => !c.projects.some((u) => u.projectId === p.id));
+  // Not the projects already using it, and not the one it was captured from.
+  const projects = getLib().projects.list().filter((p) => !c.projects.some((u) => u.projectId === p.id) && p.id !== c.origin?.project?.id);
   return (
     <>
       <h2>Used by</h2>
