@@ -36,6 +36,7 @@ The installation instructions below explain how to set it up on your own compute
 
 - A Mac. CLIO runs tests inside the sandbox built into macOS, and the "Open in Claude Code" button uses the Mac's Terminal.
 - [Node.js 22](https://nodejs.org/). CLIO's database library is built for Node 22, so other versions won't load it.
+- Git, to download CLIO. Run `git --version` to check; if it's missing, your Mac offers to install it.
 - Python 3. CLIO uses it to read your components' code. Run `python3 --version` to check; if it's missing, your Mac offers to install it.
 - [Claude Code](https://claude.com/claude-code), installed and signed in, for the features that use AI.
 
