@@ -25,7 +25,7 @@ jobs:
 
   quoting-check-can-fail:
     # Breaks the Terminal quoting on purpose and expects the Open in Claude Code test to go red.
-    # If it stays green, that test can't catch the bug that wiped the home folder on 2026-10-23.
+    # If it stays green, that test can't catch a quoting bug in the Terminal command.
     name: Quoting check can fail (macOS)
     runs-on: macos-latest
     timeout-minutes: 20
