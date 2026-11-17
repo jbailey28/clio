@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   // Hide the round "N" button Next.js adds in development mode.
   devIndicators: false,
+  experimental: {
+    // Set by `next upgrade --agent=security` when moving to 16.4.6.
+    agentUpgrade: "security",
+  },
 };
 
 export default nextConfig;
