@@ -2,7 +2,10 @@
 name: Tests
 
 on:
+  # Once per pull request, and once after a merge. Not again for every branch push,
+  # which doubled the wait for GitHub's Macs.
   push:
+    branches: [main]
   pull_request:
 
 permissions:
